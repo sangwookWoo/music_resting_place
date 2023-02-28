@@ -9,8 +9,7 @@ from bs4 import BeautifulSoup
 import time          
 
 
-driver = webdriver.Edge('C:\develop_dir\playdata_project\project3\edgedriver_win64\msedgedriver.exe')
-# Options.add_experimental_option("excludeSwitches", ["enable-logging"])
+driver = webdriver.Edge('C:\develop_dir\playdata_project\project3\edgedriver_win64\msedgedriver.exe') # 개인에게 맞는 경로 수정 필요
 song_list = []
 lyrics_archive = []
 with open("playdata_project/project3/song_list.txt", "r", encoding='utf-8') as f:
