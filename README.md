@@ -1,2 +1,2 @@
-# -Emotional-DJ
+# Emotional-DJ
 Wow... 
