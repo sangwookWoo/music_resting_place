@@ -33,4 +33,4 @@ for i in song_list:
     get_lyrics = lyrics.text
     music_df.loc[f'{i}'] = get_lyrics
 driver.close()
-music_df.to_csv('C:\develop_dir\playdata_project\music_resting_place\Recommend_songs\lyrics.csv', index=False)
+music_df.to_csv('C:\develop_dir\playdata_project\music_resting_place\Recommend_songs\lyrics.csv')
