@@ -5,3 +5,4 @@ lyrics.csv
 *.gitignore
 *.png
 *.gz
+.streamlit
