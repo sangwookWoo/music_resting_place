@@ -7,3 +7,5 @@ lyrics.csv
 *.gz
 .streamlit
 database.py
+after_preprocessing.PNG
+after_preprocessing1.PNG
