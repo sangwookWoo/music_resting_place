@@ -1,18 +1,18 @@
 ### KoELECTRA 를 사용한 pretrained 모델을 만들며 느낌 어려운점.
 
-![모델의 기존 input 형태](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/cf549924-2db4-493e-97f6-2e1fcc47b511/Untitled.png)
+![모델의 기존 input 형태](https://user-images.githubusercontent.com/43203949/222940805-db8c302f-8ef1-4644-abce-f8ecd68c02d3.png)
 
 모델의 기존 input 형태
 
 1. 위 사진처럼 Embedding 형식이 이미 정해져 있고, 그렇기 때문에 입력형태를 원하는 방식으로 바꿀 경우 이미 학습시킨 모델에 악영향을 미칠것으로 보였음.
 
-![모델의 기존 output 형태](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/119d518f-9ffe-41be-ac9a-4aafaacc335a/Untitled.png)
+![모델의 기존 output 형태](https://user-images.githubusercontent.com/43203949/222940816-93a2f6d4-2235-480e-9c1c-3586f1e9308c.png)
 
 모델의 기존 output 형태
 
 2. 그래서 우리의 데이터를 동일한 입력형태로 변경하여 모델에 넣은 후 위 사진처럼 형성되어 있는 마지막 output층만을 변경하여 좋다,싫다 2중 분류를 하는 모델에서 5가지 감정을 분류하는 다중 분류 모델을 만들려했으나(아래 사진 참고) 애초에 2중분류로 설계되어 있는 모델에 출력형태만 억지로 변경했다 보니 data type, input data size 에러가 발생했음.(해결시에 너무 오랜시간이 걸릴것으로 예상되었기에 프로젝트에 악영향을 미칠 것으로 예상됨)
 
-![변경한 output 형태](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8d2d1b43-0efb-40bb-9531-dde0932ef050/Untitled.png)
+![변경한 output 형태](https://user-images.githubusercontent.com/43203949/222940821-d70a3460-8261-4910-a2d6-eefd85c1490d.png)
 
 변경한 output 형태
 
