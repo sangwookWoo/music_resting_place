@@ -106,12 +106,13 @@ def main():
     with visualization:
         user_text = ' '.join(st.session_state['past'])
         user_length = len(user_text)
-        st.write(user_length / 300)
+        # st.write(user_length / 300)
         
         # 노래 추천 누르면 catboost 모델 작동, 아웃풋은 predict_proba
         if st.button('노래 추천받기'):
             emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
-            st.write(emotion_proba)
+            # st.write(emotion_proba)
+            st.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
         
     # # 텍스트 저장
     # st.write(st.session_state['past'])
