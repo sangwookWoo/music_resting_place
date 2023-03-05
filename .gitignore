@@ -6,3 +6,4 @@ lyrics.csv
 *.png
 *.gz
 .streamlit
+database.py
