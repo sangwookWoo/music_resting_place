@@ -1,0 +1,15 @@
+pandas
+streamlit
+streamlit_chat
+sentence_transformers
+scikit-learn
+torch
+json
+catboost
+tensorflow
+keras
+pickle
+re
+konlpy
+numpy
+pandas
