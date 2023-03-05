@@ -17,3 +17,17 @@
 저번에 사람별로 폴더를 둬서 관리하니까 이 사람 자료 확인하려면 폴더를 왔다갔다 해야하는 점이나 팀 적으로 결과물이 보일 수가 없는 구조의 작업공간이 되버려서 성취감도 덜 들고 재미가 덜 하더라고
 
 그럼 잘 사용해줘!
+
+- - -
+
+- 3월 6일 버전1 기록
+1. kobert 활용 DB 선택형 챗봇
+2. Okt, keras Tokenizer, Catboost 활용 사용자 채팅 데이터 proba 값 도출
+3. 같은 방식으로 처리된 가사 데이터 / 채팅 데이터 proba 값 비교(코사인 유사도)
+  - 모델 선정 리스트[kobert, bert(?), DL models, ML models]
+4. 사용자의 텍스트 감정과 가사의 텍스트 감정이 비슷하거나 다른 노래 추천
+  - youtube API(미구현)
+5. DB 연동 및 데이터 저장 기능(구현)
+6. 좋아요, 싫어요 기능(미구현)
+
+web_link : https://sangwookwoo-music-resting-place-chat-botchatbot-ddprnl.streamlit.app/
