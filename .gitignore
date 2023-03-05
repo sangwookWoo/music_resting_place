@@ -3,3 +3,4 @@ ignored_files
 *.gitignore
 *.png
 *.gz
+database.py

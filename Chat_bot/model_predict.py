@@ -3,6 +3,14 @@ from konlpy.tag import Okt
 from catboost import CatBoostClassifier
 from tensorflow.keras.preprocessing.text import Tokenizer
 import pickle
+import numpy as np
+import pandas as pd
+import torch.nn.functional as F
+import torch
+import os
+
+# 경로 지정
+filePath, fileName = os.path.split(__file__)
 
 # 품사 추출기
 def pos_filter(pos_pattern, tagged_sentece):
@@ -31,6 +39,24 @@ def predict_value(text, model, tokenizer):
     # 직접 원-핫 이진 벡터 표현을 얻을 수 있습니다.
     predict_X = tokenizer.texts_to_matrix(list_, mode = 'binary')
     return [class_names[model.predict(predict_X)[0][0]], model.predict_proba(predict_X)]
+
+def cos_recommend(proba):
+
+    # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
+    df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
+    df = df.rename(columns={df.columns[5]:'song'})  
+
+    # 입력 예시 (사용자와의 챗봇 대화를 통해서 상대방의 감정을 얻어낸 값을 test에 넣으면 됨.)
+    test = torch.tensor(proba) # 기분 예시
+    
+    # 우리의 노래 가사 분석 데이터를 tensor type으로 변환
+    torch_tensor = torch.from_numpy(df.values[:,:5].astype(float))
+    
+    # 코사인 유사도 분석 함수를 적용
+    df['simillarity'] = pd.Series(F.cosine_similarity(test,torch_tensor))
+
+    # 유사도 높은 놈과 낮은 놈 출력
+    return df.iloc[np.argmax(df['simillarity'])]['song'], df.iloc[np.argmin(df['simillarity'])]['song']
 
 stopwords = ['아' , '휴' , '아이구' , '아이쿠' , '아이고' , '어' , '나' , '우리' , 
 '저희' , '따라' , '의해' , '을' , '를' , '에' , '의' , '가' , '으로' ,
