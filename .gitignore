@@ -1,6 +1,7 @@
 ignored_files
-*.csv
+emotion_classification_label.csv
+emotional_communication_word_bundle.csv
+lyrics.csv
 *.gitignore
 *.png
 *.gz
-database.py
