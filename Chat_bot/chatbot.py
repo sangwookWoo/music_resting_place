@@ -108,7 +108,7 @@ def main():
             answer = df.loc[df['simillarity'].idxmax()]
             st.session_state['past'].append(user_input)
             
-            # 유사도 상 0.72 미만이면 질문 하는 응답지로 넘어감. 0.64
+            # 유사도 상 0.64 미만이면 질문 하는 응답지로 넘어감. 0.64
             if answer['simillarity'] < 0.64:
                 
                 text_list = ('제가 당신에게 힘이 되는 비밀 친구가 되어 드릴게요.',
@@ -118,7 +118,8 @@ def main():
                             '꺼내고 싶은 마음을 얘기해주면 제가 열심히 들을게요',
                             '저는 항상 여기 있어요. 하고 싶은 이야기가 있다면 들려주시겠어요?',
                             '저는 들을 준비가 되어 있어요.')
-                text = text_list[random.randint(0,len(text_list))]
+                text_length = len(text_list) - 1
+                text = text_list[random.randint(0, text_length)]
                 
                 # 특정 상황에서 답변 변경(도희)
                 
