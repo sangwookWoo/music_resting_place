@@ -5,3 +5,5 @@ lyrics.csv
 *.gitignore
 *.png
 *.gz
+!after_preprocessing.PNG
+!after_preprocessing1.PNG
