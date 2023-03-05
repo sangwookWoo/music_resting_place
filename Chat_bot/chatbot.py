@@ -12,7 +12,6 @@ import pickle
 import os
 from model_predict import *
 import random
-from database import *
 import psycopg2
 import streamlit as st
 
@@ -30,7 +29,6 @@ conn = init_connection()
 # 쿼리 실행(지금은 insert, update, delte만 가능하게)
 def run_query(query):
     with conn.cursor() as cur:
-        st.write(cur)
         cur.execute(query)
         conn.commit()
 
@@ -152,7 +150,8 @@ def main():
             emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
             
             # proba 값, 음악 넣기
-            [sql_list.append(x) for x in emotion_proba.tolist()[0]]
+            for x in emotion_proba.tolist()[0]:
+                sql_list.append(x)
             # [sql_list.append(x) for x in emotion_proba.tolist()]
             
             # 예측(코사인 유사도 기반)
@@ -162,21 +161,20 @@ def main():
             sql_list.extend([predict_cosine[0], ''])
             
             # 노래 출력
+            st.write(cos_recommend(list(emotion_proba))[0])
             st.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
             
             # 쿼리 실행
             sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
-            # query_excute(sql_query)
             run_query(sql_query)
             
-            rows = run_query("SELECT * from song.user_info;")
         
         if st.button('내 감정과 반대되는 노래 추천받기'):
             emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
             
             # proba 값, 음악 넣기
-            # sql_list.append(str(emotion_proba.tolist())[2:-2])
-            [sql_list.append(x) for x in emotion_proba.tolist()[0]]
+            for x in emotion_proba.tolist()[0]:
+                sql_list.append(x)
             
             # 예측(코사인 유사도 기반)
             predict_cosine = cos_recommend(list(emotion_proba))
@@ -190,7 +188,6 @@ def main():
             
             # 쿼리실행
             sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
-            # query_excute(sql_query)
             run_query(sql_query)
             
     # # 텍스트 저장
