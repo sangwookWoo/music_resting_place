@@ -13,9 +13,27 @@ import os
 from model_predict import *
 import random
 from database import *
+import psycopg2
+import streamlit as st
+
+
 
 # 경로 지정
 filePath, fileName = os.path.split(__file__)
+
+# 데이터베이스 연결
+def init_connection():
+    return psycopg2.connect(**st.secrets["postgres"])
+
+conn = init_connection()
+
+# 쿼리 실행(지금은 insert, update, delte만 가능하게)
+def run_query(query):
+    with conn.cursor() as cur:
+        st.write(cur)
+        cur.execute(query)
+        conn.commit()
+
 
 # 토크나이저 로드
 @st.cache(allow_output_mutation = True)
@@ -123,10 +141,10 @@ def main():
             message(st.session_state['generated'][i], key = str(i) + '_bot')
             
     user_text = ' '.join(st.session_state['past'])
-    st.write(user_text)
     with visualization:
         user_text = ' '.join(st.session_state['past'])
         user_length = len(user_text)
+        
         # st.write(user_length / 300)
         sql_list = [0]
         # 노래 추천 누르면 catboost 모델 작동, 아웃풋은 predict_proba
@@ -144,12 +162,14 @@ def main():
             sql_list.extend([predict_cosine[0], ''])
             
             # 노래 출력
-            st.write(predict_cosine[0])
             st.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
             
-            # sql 리스트 string 쓰기
+            # 쿼리 실행
             sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
-            query_excute(sql_query)
+            # query_excute(sql_query)
+            run_query(sql_query)
+            
+            rows = run_query("SELECT * from song.user_info;")
         
         if st.button('내 감정과 반대되는 노래 추천받기'):
             emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
@@ -168,10 +188,10 @@ def main():
             st.write(cos_recommend(list(emotion_proba))[1])
             st.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
             
-            # sql 리스트 string 쓰기
-            st.write(str(sql_list)[1:-1])
+            # 쿼리실행
             sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
-            query_excute(sql_query)
+            # query_excute(sql_query)
+            run_query(sql_query)
             
     # # 텍스트 저장
     # st.write(st.session_state['past'])
