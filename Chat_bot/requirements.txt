@@ -1,6 +1,6 @@
 pandas
 streamlit
-streamlit_chat
+streamlit-chat
 sentence_transformers
 scikit-learn
 torch
