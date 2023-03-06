@@ -13,8 +13,10 @@ import os
 from model_predict import *
 import random
 import psycopg2
-import streamlit as st
-
+import time
+from pyecharts import options as opts
+from pyecharts.charts import Bar
+from streamlit_echarts import st_echarts
 
 
 # 경로 지정
@@ -31,7 +33,6 @@ def run_query(query):
     with conn.cursor() as cur:
         cur.execute(query)
         conn.commit()
-
 
 # 토크나이저 로드
 @st.cache(allow_output_mutation = True)
@@ -118,6 +119,7 @@ def main():
                             '꺼내고 싶은 마음을 얘기해주면 제가 열심히 들을게요',
                             '저는 항상 여기 있어요. 하고 싶은 이야기가 있다면 들려주시겠어요?',
                             '저는 들을 준비가 되어 있어요.')
+                
                 text_length = len(text_list) - 1
                 text = text_list[random.randint(0, text_length)]
                 
@@ -140,60 +142,79 @@ def main():
             message(st.session_state['generated'][i], key = str(i) + '_bot')
             
     user_text = ' '.join(st.session_state['past'])
+    emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
+    
     with visualization:
-        user_text = ' '.join(st.session_state['past'])
+        
+        # 감정게이지
         user_length = len(user_text)
         
+        tab1, tab2, tab3 = st.tabs(["💖감정 측정", "🔍내 감정과 유사한 곡을 듣고 싶어요", "🍀내 감정과 반대되는 곡을 듣고 싶어요"])
         # st.write(user_length / 300)
-        sql_list = [0]
-        # 노래 추천 누르면 catboost 모델 작동, 아웃풋은 predict_proba
-        if st.button('감정과 유사한 노래 추천받기'):
-            emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
-            
-            # proba 값, 음악 넣기
-            for x in emotion_proba.tolist()[0]:
-                sql_list.append(x)
-            # [sql_list.append(x) for x in emotion_proba.tolist()]
-            
-            # 예측(코사인 유사도 기반)
-            predict_cosine = cos_recommend(list(emotion_proba))
-            
-            # sql_list에 예측값 넣기
-            sql_list.extend([predict_cosine[0], ''])
-            
-            # 노래 출력
-            st.write(cos_recommend(list(emotion_proba))[0])
-            st.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
-            
-            # 쿼리 실행
-            sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
-            run_query(sql_query)
-            
         
-        if st.button('내 감정과 반대되는 노래 추천받기'):
-            emotion, emotion_proba = predict_value(user_text, predict_model, tokenizer)
-            
-            # proba 값, 음악 넣기
-            for x in emotion_proba.tolist()[0]:
-                sql_list.append(x)
-            
-            # 예측(코사인 유사도 기반)
-            predict_cosine = cos_recommend(list(emotion_proba))
-            
-            # sql_list에 예측값 넣기
-            sql_list.extend(['', predict_cosine[1]])
+        sql_list = [0] # user_id를 넣을 예정(추후)
+                
+        # 최대 글자수
+        base_len = 100
+        
+        total_length = int(user_length / base_len * 100)
+        if total_length <= 100:
+            tab1.markdown('##### 🎈 감정게이지')
+            progress = tab1.progress(0)
+            tab1.markdown('##### 당신의 감정이 차오르고 있어요!')
+            progress.progress(total_length)
+        else :
+            tab1.markdown('##### 🎉 충분한 감정이 찼어요! 상태를 확인해보세요')
+            if tab1.button('감정 상태 확인하기'):
+                options = pie_chart(emotion_proba)
+                st_echarts(options=options, height="500px")        
+                            
+        # 노래 추천 누르면 catboost 모델 작동, 아웃풋은 predict_proba
+        # 글자 수가 100보다 클 때만 추천 버튼 활성화
+        if total_length >= 0:
+            if tab2.button('추천😊'):            
+                # proba 값, 음악 넣기
+                for x in emotion_proba.tolist()[0]:
+                    sql_list.append(x)
+                
+                # 예측(코사인 유사도 기반)
+                predict_cosine = cos_recommend(list(emotion_proba))
+                
+                # sql_list에 예측값 넣기
+                sql_list.extend([predict_cosine[0], ''])
+                
+                # 노래 출력
+                tab2.write(predict_cosine[0])
+                tab2.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
+                
+                # 쿼리 실행
+                sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
+                run_query(sql_query)
 
-            # 노래 출력
-            st.write(cos_recommend(list(emotion_proba))[1])
-            st.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
-            
-            # 쿼리실행
-            sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
-            run_query(sql_query)
+
+        # 글자 수가 100보다 클 때만 추천 버튼 활성화
+        if total_length >= 0:
+            if tab3.button('추천😆'):
+                # proba 값, 음악 넣기
+                for x in emotion_proba.tolist()[0]:
+                    sql_list.append(x)
+                
+                # 예측(코사인 유사도 기반)
+                predict_cosine = cos_recommend(list(emotion_proba))
+                
+                # sql_list에 예측값 넣기
+                sql_list.extend(['', predict_cosine[1]])
+
+                # 노래 출력
+                tab3.write(predict_cosine[1])
+                tab3.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
+                
+                # 쿼리실행
+                sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif) values ({str(sql_list)[1:-1]});"
+                run_query(sql_query)
             
     # # 텍스트 저장
     # st.write(st.session_state['past'])
-    user_text = ' '.join(st.session_state['past'])
 
 if __name__ == "__main__":
     main()

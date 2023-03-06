@@ -8,6 +8,7 @@ import pandas as pd
 import torch.nn.functional as F
 import torch
 import os
+from streamlit_echarts import st_echarts
 
 # 경로 지정
 filePath, fileName = os.path.split(__file__)
@@ -57,6 +58,39 @@ def cos_recommend(proba):
 
     # 유사도 높은 놈과 낮은 놈 출력
     return df.iloc[np.argmax(df['simillarity'])]['song'], df.iloc[np.argmin(df['simillarity'])]['song']
+
+def pie_chart(proba):
+    options = { 
+    "tooltip": {"trigger": "item"},
+    "legend": {"top": "5%", "left": "center"},
+    "series": [
+        {
+            "name": "당신의 감정상태",
+            "type": "pie",
+            "radius": ["40%", "70%"],
+            "avoidLabelOverlap": False,
+            "itemStyle": {
+                "borderRadius": 10,
+                "borderColor": "#fff",
+                "borderWidth": 2,
+            },
+            "label": {"show": False, "position": "center"},
+            "emphasis": {
+                "label": {"show": True, "fontSize": "40", "fontWeight": "bold"}
+            },
+            "labelLine": {"show": False},
+            "data": [
+                {"value": proba[0][0] * 100, "name": "기쁨"},
+                {"value": proba[0][1] * 100, "name": "분노"},
+                {"value": proba[0][2] * 100, "name": "불안"},
+                {"value": proba[0][3] * 100, "name": "상처"},
+                {"value": proba[0][4] * 100, "name": "슬픔"},
+                    ],
+                }
+            ],
+        }
+    return options
+
 
 stopwords = ['아' , '휴' , '아이구' , '아이쿠' , '아이고' , '어' , '나' , '우리' , 
 '저희' , '따라' , '의해' , '을' , '를' , '에' , '의' , '가' , '으로' ,
