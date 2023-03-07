@@ -168,6 +168,8 @@ def main():
     
     similar_song = predict_cosine[0]
     different_song = predict_cosine[1]
+    similar_song_link = predict_cosine[2]
+    different_song_link = predict_cosine[3]
 
     with visualization:
         
@@ -204,8 +206,7 @@ def main():
         if total_length >= base_len:
             
             # 노래 출력
-            tab2.write(similar_song)
-            tab2.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
+            tab2.video(similar_song_link)
             tab2.markdown('##### 🎼노래를 다 듣고, 평가를 해주세요! 버튼을 클릭하시면 새로운 노래를 추천드립니다!')
             
             # 좋아요 싫어요에 따라 DB 업데이트
@@ -216,8 +217,7 @@ def main():
                 db_updater('similar', sql_list, similar_song, 0)
 
             # 노래 출력
-            tab3.write(different_song)
-            tab3.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
+            tab3.video(different_song_link)
             tab3.markdown('##### 🎼노래를 다 듣고, 평가를 해주세요! 버튼을 클릭하시면 새로운 노래를 추천드립니다!')
             
             # 좋아요 싫어요에 따라 DB 업데이트
