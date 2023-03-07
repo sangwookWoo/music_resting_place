@@ -187,6 +187,10 @@ def main():
             progress = tab1.progress(0)
             tab1.markdown('##### 당신의 감정이 차오르고 있어요!')
             progress.progress(total_length)
+            
+            # 안내문 이미지
+            image = Image.open(os.path.join(filePath, 'data', 'chatbot.png'))
+            tab1.image(image, width = 770)
         else :
         # st_echarts 이용 pie chart 시각화
             tab1.markdown('##### 🎉 충분한 감정이 찼어요! 상태를 확인해보세요')
