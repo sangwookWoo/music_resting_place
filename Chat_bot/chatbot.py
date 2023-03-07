@@ -18,6 +18,9 @@ from pyecharts import options as opts
 from pyecharts.charts import Bar
 from streamlit_echarts import st_echarts
 from PIL import Image
+import pytz
+from datetime import datetime
+
 
 
 
@@ -77,6 +80,16 @@ def db_updater(similar, sql_list, song, like):
         sql_list_dif.append(like)
         sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif, user_preference) values ({str(sql_list_dif)[1:-1]});"
         run_query(sql_query)
+        
+def chatbot_db_updater(user_sentence):
+    # 서울 시간대 설정
+    tz = pytz.timezone('Asia/Seoul')
+    # 현재 서울 시간 출력
+    seoul_time = datetime.now(tz)
+    sql_query = f"insert into song.user_sentence (name, sentence, time) values (0, '{user_sentence}', '{seoul_time}')"
+    run_query(sql_query)
+    
+        
             
     
 def main():
@@ -127,6 +140,8 @@ def main():
             
             # 유사도 상 0.64 미만이면 질문 하는 응답지로 넘어감. 0.64
             if answer['simillarity'] < 0.64:
+                # 유사도 없는 답변 db 업데이트
+                chatbot_db_updater(st.session_state['past'][-1])
                 
                 text_list = ('제가 당신에게 힘이 되는 비밀 친구가 되어 드릴게요.',
                             '꺼내고 싶은 마음을 얘기해주면 제가 열심히 들을게요',
@@ -192,7 +207,8 @@ def main():
             
             # 안내문 이미지
             image = Image.open(os.path.join(filePath, 'data', 'chatbot.png'))
-            tab1.image(image, width = 770)
+            tab1.image(image, use_column_width= True)
+            
         else :
         # st_echarts 이용 pie chart 시각화
             tab1.markdown('##### 🎉 충분한 감정이 찼어요! 상태를 확인해보세요')
