@@ -211,7 +211,7 @@ def main():
             # 노래 출력
             tab3.write(different_song)
             tab3.video('https://www.youtube.com/watch?v=R8axRrFIsFI')
-            tab3.markdown('##### 🎼노래를 다 듣고, 평가를 해주세요!')
+            tab3.markdown('##### 🎼노래를 다 듣고, 평가를 해주세요! 버튼을 클릭하시면 새로운 노래를 추천드립니다!')
             
             # 좋아요 싫어요에 따라 DB 업데이트
             if tab3.button('이 노래는 제 기분을 전환해줘요😆'):
