@@ -17,6 +17,8 @@ import time
 from pyecharts import options as opts
 from pyecharts.charts import Bar
 from streamlit_echarts import st_echarts
+from PIL import Image
+
 
 
 # 경로 지정
@@ -75,13 +77,14 @@ def db_updater(similar, sql_list, song, like):
         sql_list_dif.append(like)
         sql_query = f"insert into song.user_info (name, emotion0, emotion1, emotion2, emotion3, emotion4, song_sim, song_dif, user_preference) values ({str(sql_list_dif)[1:-1]});"
         run_query(sql_query)
-
+            
     
 def main():
     
     # 페이지 세팅
-    st.set_page_config(page_title = "음악 쉼표", layout='wide', initial_sidebar_state='collapsed')
-    
+    st.set_page_config(page_title = "음악 쉼표", layout='wide', initial_sidebar_state='auto')
+            
+        
     # 모델 불러오기
     model = cached_model()
     # 토크나이저, 예측 모델 불러오기
