@@ -47,13 +47,13 @@ def predict_value(text, model, tokenizer):
 def cos_recommend(proba):
     # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
     df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
-    df = df.rename(columns={df.columns[5]:'song'})  
+    # st.dataframe(df)
     
     # 입력 예시 (사용자와의 챗봇 대화를 통해서 상대방의 감정을 얻어낸 값을 user_emotion에에 넣으면 됨.)
     user_emotion = torch.tensor(proba) # 기분 예시
     
     # 우리의 노래 가사 분석 데이터를 tensor type으로 변환
-    lyric_emotion = torch.from_numpy(df.values[:,:5].astype(float))
+    lyric_emotion = torch.from_numpy(df.values[:,3:8].astype(float))
     
     #코사인 유사도 분석 함수를 적용
     df['similarity'] = pd.Series(F.cosine_similarity(user_emotion,lyric_emotion))
@@ -70,7 +70,9 @@ def cos_recommend(proba):
     df['diff']  += random_add
     
     #유사도 높은 것과 낮은 것 출력
-    return df.iloc[np.argmax(df['similarity'])]['song'], df.iloc[np.argmin(df['diff'])]['song']
+    similar = df.iloc[np.argmax(df['similarity'])]
+    different = df.iloc[np.argmin(df['diff'])]
+    return similar['Songs_title'], different['Songs_title'], similar['link'], different['link']
 
 
 ### 감정과 반대인 곡을 추천하는 프로세스
