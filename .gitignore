@@ -4,8 +4,9 @@ emotional_communication_word_bundle.csv
 lyrics.csv
 *.gitignore
 *.png
+!chatbot.png
 *.gz
 .streamlit
 database.py
-after_preprocessing.PNG
-after_preprocessing1.PNG
+!after_preprocessing.PNG
+!after_preprocessing1.PNG
