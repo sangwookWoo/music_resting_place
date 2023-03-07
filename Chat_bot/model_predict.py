@@ -31,6 +31,7 @@ def preprocess(text):
     # 불용어처리
     return stop_words_remover(text_list)
 
+# 토크나이저를 통해서 텍스트를 변환하고, 예측 모델로 예측값과 예측확률을 반환합니다.
 def predict_value(text, model, tokenizer):
     class_names = {4: '슬픔', 3: '상처', 2: '불안', 1: '분노', 0: '기쁨'}
     text_list = preprocess(text)
@@ -41,24 +42,8 @@ def predict_value(text, model, tokenizer):
     predict_X = tokenizer.texts_to_matrix(list_, mode = 'binary')
     return [class_names[model.predict(predict_X)[0][0]], model.predict_proba(predict_X)]
 
-# def cos_recommend(proba):
 
-#     # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
-#     df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
-#     df = df.rename(columns={df.columns[5]:'song'})  
-
-#     # 입력 예시 (사용자와의 챗봇 대화를 통해서 상대방의 감정을 얻어낸 값을 test에 넣으면 됨.)
-#     test = torch.tensor(proba) # 기분 예시
-    
-#     # 우리의 노래 가사 분석 데이터를 tensor type으로 변환
-#     torch_tensor = torch.from_numpy(df.values[:,:5].astype(float))
-    
-#     # 코사인 유사도 분석 함수를 적용
-#     df['simillarity'] = pd.Series(F.cosine_similarity(test,torch_tensor))
-
-#     # 유사도 높은 놈과 낮은 놈 출력
-#     return df.iloc[np.argmax(df['simillarity'])]['song'], df.iloc[np.argmin(df['simillarity'])]['song']
-
+# 사용자의 텍스트의 감정확률을 받아, 노래의 가사감정과 유사도를 찾습니다.
 def cos_recommend(proba):
     # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
     df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
@@ -74,23 +59,40 @@ def cos_recommend(proba):
     df['similarity'] = pd.Series(F.cosine_similarity(user_emotion,lyric_emotion))
     
     # 기분전환 노래를 위한 감정 변환환 값
-    mean_point = df.mean(numeric_only=True)[:5]
-    user_emotion = user_emotion - 2*(user_emotion -mean_point)
-    user_emotion = np.array([0 if i<0  else i for i in user_emotion])
-    user_emotion = torch.tensor(user_emotion /sum(user_emotion))
-    
+    revese_emotion = torch.tensor(reverse(user_emotion))
+
     # 노래와 유저기분의 차이값 저장
-    df['diff'] = pd.Series(F.cosine_similarity(user_emotion, lyric_emotion))
-    
-    #랜덤 적용
+    df['diff'] = pd.Series(F.cosine_similarity(revese_emotion, lyric_emotion))
     random_add = np.random.rand(len(df['similarity']))/10
+
     df['similarity']  += random_add
     random_add = np.random.rand(len(df['diff']))/10
     df['diff']  += random_add
     
-    #유사도 높은 놈과 낮은 놈 출력
+    #유사도 높은 것과 낮은 것 출력
     return df.iloc[np.argmax(df['similarity'])]['song'], df.iloc[np.argmin(df['diff'])]['song']
 
+
+### 감정과 반대인 곡을 추천하는 프로세스
+
+# 기쁨이 가장 높은 감정확률의 경우
+# 기쁨의 분포를 정도를 낮추고, 나머지 감정의 분포의 맞게 나누어줌
+def reverse(user_emotion):
+    reverse_emotion = [0,0,0,0,0]
+    
+    if np.argmax(user_emotion) == 0:
+        user_emotion[0] /= 3
+        total = sum(user_emotion)
+        for i in range(0,5):
+            reverse_emotion[i] = user_emotion[i]* 1/total
+        
+    else:
+        for i in range(1,5):
+            reverse_emotion[i] = user_emotion[i]/2
+        reverse_emotion[0] = sum(reverse_emotion[1:5])
+    return reverse_emotion
+
+# 감정확률을 받아 감정을 시각화합니다. echart를 사용합니다.
 def pie_chart(proba):
     options = { 
     "tooltip": {"trigger": "item"},
@@ -123,7 +125,7 @@ def pie_chart(proba):
         }
     return options
 
-
+# 불용어 리스트
 stopwords = ['아' , '휴' , '아이구' , '아이쿠' , '아이고' , '어' , '나' , '우리' , 
 '저희' , '따라' , '의해' , '을' , '를' , '에' , '의' , '가' , '으로' ,
 '로' , '에게' , '뿐이다' , '의거하여' , '근거하여' , '입각하여' , '기준으로' ,
