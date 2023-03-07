@@ -8,6 +8,7 @@ import pandas as pd
 import torch.nn.functional as F
 import torch
 import os
+from streamlit_echarts import st_echarts
 
 # 경로 지정
 filePath, fileName = os.path.split(__file__)
@@ -40,23 +41,88 @@ def predict_value(text, model, tokenizer):
     predict_X = tokenizer.texts_to_matrix(list_, mode = 'binary')
     return [class_names[model.predict(predict_X)[0][0]], model.predict_proba(predict_X)]
 
-def cos_recommend(proba):
+# def cos_recommend(proba):
 
+#     # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
+#     df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
+#     df = df.rename(columns={df.columns[5]:'song'})  
+
+#     # 입력 예시 (사용자와의 챗봇 대화를 통해서 상대방의 감정을 얻어낸 값을 test에 넣으면 됨.)
+#     test = torch.tensor(proba) # 기분 예시
+    
+#     # 우리의 노래 가사 분석 데이터를 tensor type으로 변환
+#     torch_tensor = torch.from_numpy(df.values[:,:5].astype(float))
+    
+#     # 코사인 유사도 분석 함수를 적용
+#     df['simillarity'] = pd.Series(F.cosine_similarity(test,torch_tensor))
+
+#     # 유사도 높은 놈과 낮은 놈 출력
+#     return df.iloc[np.argmax(df['simillarity'])]['song'], df.iloc[np.argmin(df['simillarity'])]['song']
+
+def cos_recommend(proba):
     # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
     df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
     df = df.rename(columns={df.columns[5]:'song'})  
-
-    # 입력 예시 (사용자와의 챗봇 대화를 통해서 상대방의 감정을 얻어낸 값을 test에 넣으면 됨.)
-    test = torch.tensor(proba) # 기분 예시
+    
+    # 입력 예시 (사용자와의 챗봇 대화를 통해서 상대방의 감정을 얻어낸 값을 user_emotion에에 넣으면 됨.)
+    user_emotion = torch.tensor(proba) # 기분 예시
     
     # 우리의 노래 가사 분석 데이터를 tensor type으로 변환
-    torch_tensor = torch.from_numpy(df.values[:,:5].astype(float))
+    lyric_emotion = torch.from_numpy(df.values[:,:5].astype(float))
     
-    # 코사인 유사도 분석 함수를 적용
-    df['simillarity'] = pd.Series(F.cosine_similarity(test,torch_tensor))
+    #코사인 유사도 분석 함수를 적용
+    df['similarity'] = pd.Series(F.cosine_similarity(user_emotion,lyric_emotion))
+    
+    # 기분전환 노래를 위한 감정 변환환 값
+    mean_point = df.mean(numeric_only=True)[:5]
+    user_emotion = user_emotion - 2*(user_emotion -mean_point)
+    user_emotion = np.array([0 if i<0  else i for i in user_emotion])
+    user_emotion = torch.tensor(user_emotion /sum(user_emotion))
+    
+    # 노래와 유저기분의 차이값 저장
+    df['diff'] = pd.Series(F.cosine_similarity(user_emotion, lyric_emotion))
+    
+    #랜덤 적용
+    random_add = np.random.rand(len(df['similarity']))/10
+    df['similarity']  += random_add
+    random_add = np.random.rand(len(df['diff']))/10
+    df['diff']  += random_add
+    
+    #유사도 높은 놈과 낮은 놈 출력
+    return df.iloc[np.argmax(df['similarity'])]['song'], df.iloc[np.argmin(df['diff'])]['song']
 
-    # 유사도 높은 놈과 낮은 놈 출력
-    return df.iloc[np.argmax(df['simillarity'])]['song'], df.iloc[np.argmin(df['simillarity'])]['song']
+def pie_chart(proba):
+    options = { 
+    "tooltip": {"trigger": "item"},
+    "legend": {"top": "5%", "left": "center"},
+    "series": [
+        {
+            "name": "당신의 감정상태",
+            "type": "pie",
+            "radius": ["40%", "70%"],
+            "avoidLabelOverlap": False,
+            "itemStyle": {
+                "borderRadius": 10,
+                "borderColor": "#fff",
+                "borderWidth": 2,
+            },
+            "label": {"show": False, "position": "center"},
+            "emphasis": {
+                "label": {"show": True, "fontSize": "40", "fontWeight": "bold"}
+            },
+            "labelLine": {"show": False},
+            "data": [
+                {"value": proba[0][0] * 100, "name": "기쁨"},
+                {"value": proba[0][1] * 100, "name": "분노"},
+                {"value": proba[0][2] * 100, "name": "불안"},
+                {"value": proba[0][3] * 100, "name": "상처"},
+                {"value": proba[0][4] * 100, "name": "슬픔"},
+                    ],
+                }
+            ],
+        }
+    return options
+
 
 stopwords = ['아' , '휴' , '아이구' , '아이쿠' , '아이고' , '어' , '나' , '우리' , 
 '저희' , '따라' , '의해' , '을' , '를' , '에' , '의' , '가' , '으로' ,

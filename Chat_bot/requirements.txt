@@ -13,3 +13,4 @@ pandas
 sqlalchemy
 Keras-Preprocessing
 psycopg2-binary== 2.9.5
+streamlit-echarts
