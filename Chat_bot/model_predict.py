@@ -45,6 +45,7 @@ def predict_value(text, model, tokenizer):
 
 # 사용자의 텍스트의 감정확률을 받아, 노래의 가사감정과 유사도를 찾습니다.
 def cos_recommend(proba):
+    ran_val = 30
     # 우리가 만들어둔 노래 가사들을 감정분석 돌린 결과 csv파일을 읽어온다.
     df = pd.read_csv(os.path.join(filePath, 'data', 'cat_proba_lyrics.csv'))
     # st.dataframe(df)
@@ -60,18 +61,18 @@ def cos_recommend(proba):
     
     # 기분전환 노래를 위한 감정 변환환 값
     revese_emotion = torch.tensor(reverse(user_emotion))
-
+    
     # 노래와 유저기분의 차이값 저장
     df['diff'] = pd.Series(F.cosine_similarity(revese_emotion, lyric_emotion))
-    random_add = np.random.rand(len(df['similarity']))/10
+    random_add = np.random.rand(len(df['similarity']))/ran_val
 
     df['similarity']  += random_add
-    random_add = np.random.rand(len(df['diff']))/10
+    random_add = np.random.rand(len(df['diff']))/ran_val
     df['diff']  += random_add
     
     #유사도 높은 것과 낮은 것 출력
     similar = df.iloc[np.argmax(df['similarity'])]
-    different = df.iloc[np.argmin(df['diff'])]
+    different = df.iloc[np.argmax(df['diff'])]
     return similar['Songs_title'], different['Songs_title'], similar['link'], different['link']
 
 
@@ -80,18 +81,26 @@ def cos_recommend(proba):
 # 기쁨이 가장 높은 감정확률의 경우
 # 기쁨의 분포를 정도를 낮추고, 나머지 감정의 분포의 맞게 나누어줌
 def reverse(user_emotion):
+    emotion_div = 2
     reverse_emotion = [0,0,0,0,0]
     
     if np.argmax(user_emotion) == 0:
         user_emotion[0] /= 3
         total = sum(user_emotion)
         for i in range(0,5):
-            reverse_emotion[i] = user_emotion[i]* 1/total
+            reverse_emotion[i] = user_emotion[i] / total
         
     else:
         for i in range(1,5):
-            reverse_emotion[i] = user_emotion[i]/2
-        reverse_emotion[0] = sum(reverse_emotion[1:5])
+            # user emotion 리스트를 특정수로 나누기
+            add_num = user_emotion[i] / emotion_div
+            
+            # 나눈 값을 기쁨에 덯개주기
+            reverse_emotion[0] += add_num
+            
+            # 바뀐
+            reverse_emotion[i] = user_emotion[i] - add_num
+        reverse_emotion[0] += user_emotion[0]
     return reverse_emotion
 
 # 감정확률을 받아 감정을 시각화합니다. echart를 사용합니다.
