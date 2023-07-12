@@ -1,40 +1,43 @@
-# Guide for use this repo
+## 챗봇을 통해 AI와 공감 형태의 대화를 진행하고, 그 속에서 추출된 감성분석을 통해 감성과 유사한/감성과 반대의 음악을 추천해주는 웹사이트를 제작.
+## 기획 의도
+기존 음악어플의 플레이리스트/순위 및 장르 추천에서 벗어나 사용자의 개인 감정에 기반한 새로운 음악 추천 모델 구현
 
-1. main branch에서 lower branch로 분기해서 각자 작업한 후에
+## 데이터셋
+### 챗봇
+웰니스 대화 스크립트 :
+https://aihub.or.kr/aihubdata/data/view.do?currMenu=120&topMenu=100&aihubDataSe=extrldata&dataSetSn=267
 
-2. '음.. 지금의 결과를 하나의 버전으로 main에 반영하고 싶은데?' 할 때 푸쉬를 하고 나서
+### 감성분석
+감성말뭉치 : https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100
+노년층 대상 감성 분류 모델(CSV 데이터) : https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100
 
-3. pull request를 거쳐 충돌 문제는 없는지와 필요하다면 부가적인 확인을 한 후에 merge를 하고
+### 음악 추천 알고리즘
+멜론 음악 가사 데이터(셀레니움 기반 크롤링)
+노래별 유튜브 링크 데이터(셀레니움 기반 크롤링)
 
-4. 하나의 버전을 만들기 위해 생성했던, 작업하는 동안 위치해있던 branch를 삭제
+### 팀구성 및 역할(TEAM 음악쉼표)
+우상욱: 웹개발(streamlit 프레임워크 활용), 챗봇 개발, ML/DL 모델링, 자연어 데이터 가공(Okt 기반 불용어처리, 토크나이징)
+황도희: 챗봇 개발, 노래별 유튜브 링크 데이터 크롤링, ML 모델링, 자연어 데이터 가공(Okt 기반 품사추출, 토크나이징)
+민병창: DL 모델링, 자연어 데이터 가공(subword tokenizer 기반 토크나이징), 음악 추천 알고리즘 개발
+서영호: 자연어 데이터 가공 모델 -> 활용 데이터 적용 및 전처리, ML 모델링, ML/DL 모델 결과 비교분석
+신제우: DL 모델링(KoBERT), 노래 가사 데이터 크롤링 및 영문-> 한글 변환 자동화 프로그램 개발
 
-5. 그리고 나서 다음 작업을 하기 위해선 다시 분기점 생성(branch 생성)
+## 기술스택(라이브러리 위주 기술)
+### 챗봇
+데이터 가공 : PANDAS, NUMPY, TORCH
 
-6. 다시 2번부터 동일하게 진행
+### 모델링
+SENTENCE TRANSFORMER(HUGGING FACE API)
 
-# 3/6 MEMO
+### 감성분석
+데이터 가공 : PANDAS, NUMPY, KONLPY, SENTENCEPIECE
+모델링 : SKLEARN, CATBOOST, XGBOOST, LGBM , TENSORFLOW
 
-## 신제우 
-### 오늘 할 일
-- KoBERT를 코랩에서 GPU 사용가능할 때까지 파라미터 조정해서 돌려보기
-- 유사도 계산하는 코드에서 감정을 전환하고 싶을 때 하는 계산식에서 일어나는 이상치값 처리를 시도. / [참조 링크](https://gils-lab.tistory.com/94)
+### 음악 추천 알고리즘
+NUMPY, TORCH
 
+### 웹구현
+STREAMLIT
 
-## 민병창 군
-### 오늘 할 일
-- koELECTRA 매무으리 된듯?
-- LSTM 관련 딥러닝 모델 재차 시도
-
-## 서영호 씨
-### 오늘 할 일
-- 머신러닝 좋게 나오게 계속해서 도저어어언 혹은 더 좋은 방안이 있을지 의논해보면 좋을 것 같습니다!
-
-## 황도희 양
-### 오늘 할 일
-- 유튜브 링크 찾는 api 도저어언
-### 의논하고 싶은 일
-- 도희 양 말씀 : "노래는 제우, 영호가 한 거 외에 텍스트파일로 리스트 뽑았는데 vs코드와 주피터 노트북 모두 size limit 떠서 가사 불러오진 못함 (help me..)"
-
-## 우상욱 상
-### 오늘 할 일
-- ???
+### 데이터베이스(POSTGRESQL)
+PSYCOPG2
